@@ -1,4 +1,4 @@
-# Testing sandbox level 1
+# Testing sandbox level 2.1
 
 Welcome to the testing sandbox: practice-driven testing instrument.
 It can help you to get more comfortable and skilful at writing different
