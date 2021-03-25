@@ -3,8 +3,9 @@ import datetime
 import os
 import sqlite3
 import sys
+import re
 from pathlib import Path
-from typing import Optional, Set, re, Callable, Union, Collection, Mapping, Any
+from typing import Optional, Set, Callable, Union, Collection, Mapping, Any
 
 import deal as deal
 from PIL import UnidentifiedImageError
@@ -12,16 +13,13 @@ from chardet import detect
 from pytz import timezone as check_timezone
 import pytz.exceptions
 import xlrd
-from openpyxl import Workbook, load_workbook
+from openpyxl import Workbook
 
-from level1_basics.code import get_image_height_in_pixels, flat
+from level1_basics.code import get_image_height_in_pixels, flat, ColumnError
+
 
 OBSCENE_BASE_TABLE_NAME = 'words'
 CONFIG_SECTION_NAME = 'testing_sandbox'
-
-
-class ColumnError(Exception):
-    pass
 
 
 def load_obscene_words(db_path: str) -> Set[str]:
@@ -98,7 +96,6 @@ def reorder_vocabulary(vocabulary_path: str) -> None:
             + sorted(f'{r}\n' for r in section if not r.startswith('#'))
             + (['\n'] if section_num < len(sections) else []),
         )
-
     with open(vocabulary_path, 'w') as file_handler:
         file_handler.writelines(flat(sorted_sections))
 
@@ -187,7 +184,6 @@ def _load_workbook_from_xls(file_path, file_contents) -> Workbook:
             if value and cell.ctype == 3:
                 value = datetime.datetime(*xlrd.xldate_as_tuple(value, xls_workbook.datemode))
             ws.cell(row=row + 1, column=col + 1).value = value
-
     return wb
 
 
