@@ -73,7 +73,7 @@ def test_get_params_from_config(mocker, has_section, params, expected):
     mock_parser = mocker.patch('filecode.configparser.ConfigParser', autospec=True)
     mock_parser.return_value = mocker.MagicMock()
     mock_parser.read.return_value = None
-    mock_parser.has_section.return_value = has_section
+    mock_parser().has_section.return_value = has_section
     mock_parser().__getitem__.return_value = params
     assert filecode.get_params_from_config('config_path') == expected
 
