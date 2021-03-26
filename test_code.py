@@ -187,7 +187,7 @@ def test_get_datetime_from_string(value, formats, parser, expected):
         (datetime.datetime(2018, 9, 18), datetime.datetime(2018, 9, 18), None),
         (datetime.date(2018, 9, 18), datetime.datetime(2018, 9, 18), None),
         (123, None, None),
-        (datetime.datetime(2018, 9, 18), datetime.datetime(2018, 9, 17, 21, tzinfo=UTC), 'UTC'),
+        (datetime.datetime(2018, 9, 18), datetime.datetime(2018, 9, 18, tzinfo=UTC), 'UTC'),
     ]
 )
 def test_process_value(mocker, value, expected, timezone):
