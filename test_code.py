@@ -144,22 +144,26 @@ def test_fetch_badges_urls(mocker, readme_content, height, expected, has_image_e
 
 
 @pytest.mark.parametrize(
-    'module_name, sys_modules',
+    'module_names, sys_modules',
     [
-        ('unittest', {'unittest': Mock(spec=['SkipTest'])}),
-        ('unittest2', {'unittest2': Mock(spec=['SkipTest'])}),
-        ('nose', {'nose': Mock(spec=['SkipTest'])}),
-        ('_pytest', {'_pytest': Mock(spec=['outcomes', 'SkipTest'])}),
+        (['unittest'], {'unittest': Mock(spec=['SkipTest'])}),
+        (['unittest2'], {'unittest2': Mock(spec=['SkipTest'])}),
+        (['nose'], {'nose': Mock(spec=['SkipTest'])}),
+        (['_pytest'], {'_pytest': Mock(spec=['outcomes', 'SkipTest'])}),
+        (['unittest', 'unittest2'], {'unittest': Mock(spec=['SkipTest']), 'unittest2': Mock(spec=['SkipTest'])}),
     ]
 )
-def test_skip_exceptions_to_reraise(mocker, sys_modules, module_name):
+def test_skip_exceptions_to_reraise(mocker, sys_modules, module_names):
     mock_sys = mocker.patch('main.sys')
     mock_sys.modules = sys_modules
 
-    if module_name == '_pytest':
-        sys_modules[module_name].outcomes.Skipped = sys_modules[module_name].SkipTest
+    expexted = []
+    for module_name in module_names:
+        if module_name == '_pytest':
+            sys_modules[module_name].outcomes.Skipped = sys_modules[module_name].SkipTest
+        expexted.append(sys_modules[module_name].SkipTest)
 
-    assert skip_exceptions_to_reraise() == (sys_modules[module_name].SkipTest,)
+    assert skip_exceptions_to_reraise() == tuple(expexted)
 
 
 @pytest.mark.parametrize(
