@@ -13,7 +13,7 @@ from chardet import detect
 from pytz import timezone as check_timezone
 import pytz.exceptions
 import xlrd
-from openpyxl import Workbook, load_workbook
+from openpyxl import Workbook
 
 from level1_basics.code import get_image_height_in_pixels, flat
 
@@ -143,7 +143,7 @@ class DateTimeProcessor:
                 self.user_timezone = check_timezone(timezone)
             except pytz.exceptions.UnknownTimeZoneError:
                 self.user_timezone = None
-                raise ValueError(f'Unknown time zone.')
+                raise ValueError('Unknown time zone.')
 
     def process_value(self, value):
         if isinstance(value, str):
