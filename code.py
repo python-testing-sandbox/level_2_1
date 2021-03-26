@@ -4,7 +4,8 @@ import os
 import sqlite3
 import sys
 from pathlib import Path
-from typing import Optional, Set, re, Callable, Union, Collection, Mapping, Any
+from typing import Optional, Set, Callable, Union, Collection, Mapping, Any
+import re
 
 import deal as deal
 from PIL import UnidentifiedImageError
