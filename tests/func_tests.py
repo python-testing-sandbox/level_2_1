@@ -161,19 +161,19 @@ def test_process_value_with_exception(value, expected, expectation):
 
 
 @pytest.mark.parametrize(
-    'formats, parser_side_effect, value, expected, expectation',
+    'formats, parser_side_effect, parser_value, value, expected, expectation',
     [
-        (None, ValueError, 'value', None, pytest.raises(ColumnError)),
-        (None, 'value', 'value', 'value', does_not_raise()),
-        (['%d %m %Y'], None, 'value', None, pytest.raises(ColumnError)),
-        (['%d %m %Y'], None, '25 3 2021', datetime.datetime(2021, 3, 25), does_not_raise())
+        (None, ValueError, None, 'value', None, pytest.raises(ColumnError)),
+        (None, None, 'value', 'value', 'value', does_not_raise()),
+        (['%d %m %Y'], None, None, 'value', None, pytest.raises(ColumnError)),
+        (['%d %m %Y'], None, None, '25 3 2021', datetime.datetime(2021, 3, 25), does_not_raise())
     ]
 )
-def test_get_datetime_from_string(mocker, formats, parser_side_effect, value, expected, expectation):
-    mock_parser = mocker.MagicMock(side_effect=parser_side_effect)
+def test_get_datetime_from_string(mocker, formats, parser_side_effect, parser_value, value, expected, expectation):
+    mock_parser = mocker.MagicMock(side_effect=parser_side_effect, return_value=parser_value)
     processor = filecode.DateTimeProcessor(formats=formats, parser=mock_parser)
     with expectation:
-        processor._get_datetime_from_string(value) == expected
+        assert processor._get_datetime_from_string(value) == expected
 
 
 @pytest.mark.parametrize(
