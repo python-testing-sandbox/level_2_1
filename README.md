@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/OdintsovTim/level_2_1/branch/master/graph/badge.svg)](https://codecov.io/gh/OdintsovTim/level_2_1)
+
 # Testing sandbox level 2.1
 
 Welcome to the testing sandbox: practice-driven testing instrument.
