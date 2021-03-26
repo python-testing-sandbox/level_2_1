@@ -175,9 +175,9 @@ def test_get_datetime_from_string(value, formats, parser, expected):
     processor = DateTimeProcessor(formats=formats, parser=parser)
     if parser and parser.side_effect:
         with pytest.raises(ColumnError):
-            assert processor._get_datetime_from_string('18 9 2018') == expected
+            assert processor._get_datetime_from_string(value) == expected
     else:
-        assert processor._get_datetime_from_string('18 9 2018') == expected
+        assert processor._get_datetime_from_string(value) == expected
 
 
 @pytest.mark.parametrize(
