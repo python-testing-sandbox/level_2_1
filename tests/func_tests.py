@@ -35,9 +35,8 @@ def test_load_obscene_words(mocker, fetchall, expected):
 )
 def test_get_all_filepathes_recursively(mocker, isdir, expected):
     mock_path = mocker.patch('filecode.Path')
-    mock_os = mocker.patch('filecode.os.path')
+    mocker.patch('filecode.os.path.isdir', return_value=isdir)
     mock_path().glob.return_value = ['images/image.jpg', 'pictures/picture.jpg']
-    mock_os.isdir.return_value = isdir
     assert filecode.get_all_filepathes_recursively('path', 'extension') == expected
 
 
@@ -71,7 +70,6 @@ def test_get_content_from_file(mocker, guess_encoding, expected):
 )
 def test_get_params_from_config(mocker, has_section, params, expected):
     mock_parser = mocker.patch('filecode.configparser.ConfigParser', autospec=True)
-    mock_parser.return_value = mocker.MagicMock()
     mock_parser.read.return_value = None
     mock_parser().has_section.return_value = has_section
     mock_parser().__getitem__.return_value = params
@@ -177,15 +175,16 @@ def test_get_datetime_from_string(mocker, formats, parser_side_effect, parser_va
 
 
 @pytest.mark.parametrize(
-    'marketplace_value, has_attr',
+    'marketplace_value, attrs, has_attr',
     [
-        ('ebay', True),
-        ('etsy', False),
+        ('ebay', ['ebay_listed_at'], True),
+        ('etsy', ['etsy_listed_at'], True),
+        ('etsy', ['ebay_listed_at'], False),
     ]
 )
-def test_set_listed_at(mocker, marketplace_value, has_attr):
-    mock_marketplace, mock_item = mocker.Mock(), mocker.Mock()
-    mock_datetime, mock_setattr = mocker.patch('filecode.datetime'), mocker.patch('filecode.setattr')
+def test_set_listed_at(mocker, marketplace_value, attrs, has_attr):
+    mock_marketplace, mock_item = mocker.Mock(), mocker.Mock(spec=attrs)
+    mock_datetime = mocker.patch('filecode.datetime')
     mock_hasattr = mocker.patch('filecode.hasattr', return_value=has_attr)
     mock_datetime.datetime.now.return_value = datetime.date(2021, 1, 1)
     mock_marketplace.value = marketplace_value
@@ -193,7 +192,10 @@ def test_set_listed_at(mocker, marketplace_value, has_attr):
 
     mock_hasattr.assert_called_with(mock_item, f'{marketplace_value}_listed_at')
     if has_attr:
-        mock_setattr.assert_called_with(mock_item, f'{marketplace_value}_listed_at', mock_datetime.datetime.now())
+        assert getattr(mock_item, f'{marketplace_value}_listed_at') == mock_datetime.datetime.now()
+    else:
+        with pytest.raises(AttributeError):
+            assert getattr(mock_item, f'{marketplace_value}_listed_at') == mock_datetime.datetime.now()
 
 
 @pytest.mark.parametrize(

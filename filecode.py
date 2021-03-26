@@ -157,7 +157,6 @@ class DateTimeProcessor:
     def _get_datetime_from_string(self, value: str) -> datetime.datetime:
         if not self.formats:
             try:
-                print(self.parser(value))
                 return self.parser(value)
             except ValueError:
                 raise ColumnError(f'Unable to convert "{value}" to date.')
