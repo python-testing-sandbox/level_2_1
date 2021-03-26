@@ -6,7 +6,7 @@ from freezegun import freeze_time
 import pytest
 from pytz import UTC
 
-from code import (
+from main import (
     _set_listed_at, load_obscene_words, get_all_filepathes_recursively, get_params_from_config,
     CONFIG_SECTION_NAME, fetch_detailed_pull_requests, get_content_from_file,
     fetch_badges_urls, skip_exceptions_to_reraise, DateTimeProcessor, reorder_vocabulary, ColumnError,
@@ -24,7 +24,7 @@ from code import (
     ]
 )
 def test_load_obscene_words(execute_result, expected, mocker):
-    mock_sqlite3 = mocker.patch('code.sqlite3')
+    mock_sqlite3 = mocker.patch('main.sqlite3')
     mock_sqlite3.connect().cursor().execute().fetchall.return_value = execute_result
 
     assert load_obscene_words('any path') == expected
@@ -63,8 +63,8 @@ def test_set_listed_at(item_attrs, marketplace_slug, current_datetime, monkeypat
     ]
 )
 def test_get_all_filepathes_recursively(mocker, pathlist, is_dir, expected):
-    mocker.patch('code.Path.glob', return_value=pathlist)
-    mocker.patch('code.os.path.isdir', return_value=is_dir)
+    mocker.patch('main.Path.glob', return_value=pathlist)
+    mocker.patch('main.os.path.isdir', return_value=is_dir)
     assert get_all_filepathes_recursively('any_path', 'py') == expected
 
 
@@ -82,7 +82,7 @@ def test_get_all_filepathes_recursively(mocker, pathlist, is_dir, expected):
     ]
 )
 def test_get_params_from_config(mocker, has_section, expected, params):
-    mock_parser = mocker.patch('code.configparser')
+    mock_parser = mocker.patch('main.configparser')
     parsed_config_file = {CONFIG_SECTION_NAME: params}
     mock_parser.ConfigParser().__getitem__.side_effect = parsed_config_file.__getitem__
 
@@ -118,7 +118,7 @@ def test_get_content_from_file(mocker, tmpdir, guess_encoding, expected, content
     p.write(content)
 
     if decode_error:
-        mocker_open = mocker.patch('code.open', mocker.mock_open(read_data='data'))
+        mocker_open = mocker.patch('main.open', mocker.mock_open(read_data='data'))
         mocker_open.side_effect = UnicodeDecodeError('error', b"", 0, 0, 'error')
 
     assert get_content_from_file(p.strpath, guess_encoding) == expected
@@ -136,9 +136,9 @@ def test_get_content_from_file(mocker, tmpdir, guess_encoding, expected, content
 )
 def test_fetch_badges_urls(mocker, readme_content, height, expected, has_image_error):
     if has_image_error:
-        mocker.patch('code.get_image_height_in_pixels', side_effect=UnidentifiedImageError)
+        mocker.patch('main.get_image_height_in_pixels', side_effect=UnidentifiedImageError)
     else:
-        mocker.patch('code.get_image_height_in_pixels', return_value=height)
+        mocker.patch('main.get_image_height_in_pixels', return_value=height)
 
     assert fetch_badges_urls(readme_content) == expected
 
@@ -153,7 +153,7 @@ def test_fetch_badges_urls(mocker, readme_content, height, expected, has_image_e
     ]
 )
 def test_skip_exceptions_to_reraise(mocker, sys_modules, module_name):
-    mock_sys = mocker.patch('code.sys')
+    mock_sys = mocker.patch('main.sys')
     mock_sys.modules = sys_modules
 
     if module_name == '_pytest':
@@ -193,7 +193,7 @@ def test_get_datetime_from_string(value, formats, parser, expected):
 def test_process_value(mocker, value, expected, timezone):
     processor = DateTimeProcessor(timezone=timezone)
     if expected:
-        mocker.patch('code.DateTimeProcessor._get_datetime_from_string', return_value=expected)
+        mocker.patch('main.DateTimeProcessor._get_datetime_from_string', return_value=expected)
         assert processor.process_value(value) == expected
     else:
         with pytest.raises(ColumnError):
@@ -236,12 +236,12 @@ def test_reorder_vocabulary(tmpdir, content, expected):
     ]
 )
 def test_load_workbook_from_xls(mocker, value, ctype):
-    mock_xls_workbook = mocker.patch('code.xlrd.open_workbook', autospec=True)
+    mock_xls_workbook = mocker.patch('main.xlrd.open_workbook', autospec=True)
     mock_xls_sheet = mock_xls_workbook().sheet_by_index()
     mock_xls_sheet.cell().value = value
     mock_xls_sheet.cell().ctype = ctype
-    mock_wordbook = mocker.patch('code.Workbook')
-    mocker.patch('code.datetime.datetime', return_value=value)
+    mock_wordbook = mocker.patch('main.Workbook')
+    mocker.patch('main.datetime.datetime', return_value=value)
     mock_xls_workbook().datemode = 1
 
     assert _load_workbook_from_xls('any path', 'any contents') == mock_wordbook()
