@@ -9,4 +9,3 @@ script:
   - coverage run -m --branch pytest
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-s
