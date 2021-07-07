@@ -53,24 +53,6 @@ def test_get_all_filepathes_recursively(path_file, is_dir, extension, expected, 
         (False, {'processes': '0', 'exit_zero': 'True'}, {}),
         (True, {'reorder_vocabulary': 'True', 'exit_zero': 'True'}, {'reorder_vocabulary': True, 'exit_zero': True}),
         (True, {'verbosity': '-20', 'process_dots': 'False'}, {'process_dots': False, 'verbosity': -20}),
-    ]
- )
-def test_get_params_from_config(mocker, config_section, params, expected):
-    mocker_config_parser = mocker.patch('codes.configparser', autospec=True)
-    mocker_config_parser.ConfigParser().read.return_value = None
-    mocker_config_parser.ConfigParser().has_section.return_value = config_section
-    mocker_config_parser.ConfigParser().__getitem__.return_value = params
-    assert get_params_from_config('config_path') == expected
-
-
-@pytest.mark.parametrize(
-    'config_section, params, expected',
-    [
-        (False, {'processes': '0'}, {}),
-        (True, {'processes': '0'}, {'processes': 0}),
-        (False, {'processes': '0', 'exit_zero': 'True'}, {}),
-        (True, {'reorder_vocabulary': 'True', 'exit_zero': 'True'}, {'reorder_vocabulary': True, 'exit_zero': True}),
-        (True, {'verbosity': '-20', 'process_dots': 'False'}, {'process_dots': False, 'verbosity': -20}),
         (True, {'exclude': 'i,need,more, time'}, {'exclude': ['i', 'need', 'more', ' time']}),
     ]
  )
