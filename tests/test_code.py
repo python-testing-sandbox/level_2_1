@@ -2,7 +2,7 @@ import pytest
 
 from io import StringIO
 import sys
-from codes import (load_obscene_words, fetch_detailed_pull_requests)
+from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively)
 
 
 @pytest.mark.parametrize(
@@ -31,3 +31,16 @@ def test_fetch_detailed_pull_requests(mocker, open_pull_requests, pull_request, 
     mock_api = mocker.Mock()
     mock_api.fetch_pull_request.return_value = pull_request
     assert fetch_detailed_pull_requests(mock_api, open_pull_requests) == expected
+
+
+@pytest.mark.parametrize(
+    'path_file, is_dir, extension,expected',
+    [
+        (['test_code.py, confest.py'], True, 'py', []),
+        (['test_code.py, confest.py'], False, 'py', ['test_code.py, confest.py']),
+    ]
+ )
+def test_get_all_filepathes_recursively(path_file,is_dir, extension, expected, mocker):
+    mocker.patch('codes.Path.glob', return_value=path_file)
+    mocker.patch('codes.os.path.isdir', return_value=is_dir)
+    assert get_all_filepathes_recursively('tests', extension) == expected
