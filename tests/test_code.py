@@ -1,7 +1,5 @@
 import pytest
 
-from io import StringIO
-import sys
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively)
 
 
@@ -40,7 +38,7 @@ def test_fetch_detailed_pull_requests(mocker, open_pull_requests, pull_request, 
         (['test_code.py, confest.py'], False, 'py', ['test_code.py, confest.py']),
     ]
  )
-def test_get_all_filepathes_recursively(path_file,is_dir, extension, expected, mocker):
+def test_get_all_filepathes_recursively(path_file, is_dir, extension, expected, mocker):
     mocker.patch('codes.Path.glob', return_value=path_file)
     mocker.patch('codes.os.path.isdir', return_value=is_dir)
     assert get_all_filepathes_recursively('tests', extension) == expected
