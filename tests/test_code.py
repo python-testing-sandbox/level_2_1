@@ -1,8 +1,8 @@
 import pytest
 import datetime
-
+from PIL import UnidentifiedImageError
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively,
-                   get_params_from_config, _set_listed_at, DateTimeProcessor)
+                   get_params_from_config, _set_listed_at, DateTimeProcessor, fetch_badges_urls)
 
 
 @pytest.mark.parametrize(
@@ -26,7 +26,7 @@ def test_load_obscene_words(db_path, expected, mocker):
         ([{'number': 2}], None, {}),
         ([{'number': 3}], {'number': 4}, {4: {'number': 4}}),
      ]
- )
+)
 def test_fetch_detailed_pull_requests(mocker, open_pull_requests, pull_request, expected):
     mock_api = mocker.Mock()
     mock_api.fetch_pull_request.return_value = pull_request
@@ -39,7 +39,7 @@ def test_fetch_detailed_pull_requests(mocker, open_pull_requests, pull_request, 
         (['test_code.py, confest.py'], True, 'py', []),
         (['test_code.py, confest.py'], False, 'py', ['test_code.py, confest.py']),
     ]
- )
+)
 def test_get_all_filepathes_recursively(path_file, is_dir, extension, expected, mocker):
     mocker.patch('codes.Path.glob', return_value=path_file)
     mocker.patch('codes.os.path.isdir', return_value=is_dir)
@@ -56,7 +56,7 @@ def test_get_all_filepathes_recursively(path_file, is_dir, extension, expected, 
         (True, {'verbosity': '-20', 'process_dots': 'False'}, {'process_dots': False, 'verbosity': -20}),
         (True, {'exclude': 'i,need,more, time'}, {'exclude': ['i', 'need', 'more', ' time']}),
     ]
- )
+)
 def test_get_params_from_config(mocker, config_section, params, expected):
     mocker_config_parser = mocker.patch('codes.configparser', autospec=True)
     mocker_config_parser.ConfigParser().read.return_value = None
@@ -72,7 +72,7 @@ def test_get_params_from_config(mocker, config_section, params, expected):
         ('etsy', 'etsy_listed_at', True),
         ('shopify', 'etsy_listed_at', False),
     ]
- )
+)
 def test_set_listed_at(mocker, marketplace_value, item_attr, has_attr):
     mocker_item = mocker.Mock(spec=[item_attr])
     mocker_marketplace = mocker.Mock(spec=['value'])
@@ -93,7 +93,24 @@ def test_set_listed_at(mocker, marketplace_value, item_attr, has_attr):
     [
         ('9 3 2021', ['%d %m %Y'], None, datetime.datetime(2021, 3, 9, 0, 0)),
     ]
- )
+)
 def test_get_datetime_from_string(datetime_str, formats, parser, expected):
     date_time_processor = DateTimeProcessor(formats=formats, parser=parser)
     assert date_time_processor._get_datetime_from_string(datetime_str) == expected
+
+
+@pytest.mark.parametrize(
+    'readme_content, image_height, error, expected',
+    [
+        ('![](httpG![](httpg ?d[+g`)', 100, None, []),
+        ('![](http://)', 50, None, ['http://']),
+        ('![](http://)', None, None, []),
+        ('![](http://)', 100, UnidentifiedImageError(), ['http://']),
+        ('', None, UnidentifiedImageError(), []),
+        ('', 100, UnidentifiedImageError(), []),
+    ]
+)
+def test_fetch_badges_urls(mocker, readme_content, image_height, error, expected):
+    mocker_image_height = mocker.patch('codes.get_image_height_in_pixels', return_value=image_height)
+    mocker_image_height.side_effect = error
+    assert fetch_badges_urls(readme_content) == expected
