@@ -1,7 +1,8 @@
 import pytest
+import datetime
 
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively,
-                   get_params_from_config, )
+                   get_params_from_config, _set_listed_at)
 
 
 @pytest.mark.parametrize(
@@ -62,3 +63,26 @@ def test_get_params_from_config(mocker, config_section, params, expected):
     mocker_config_parser.ConfigParser().has_section.return_value = config_section
     mocker_config_parser.ConfigParser().__getitem__.return_value = params
     assert get_params_from_config('config_path') == expected
+
+
+@pytest.mark.parametrize(
+    'marketplace_value, item_attr,  has_attr',
+    [
+        ('ebay', 'ebay_listed_at', True),
+        ('etsy', 'etsy_listed_at', True),
+        ('shopify', 'etsy_listed_at', False),
+    ]
+ )
+def test_set_listed_at(mocker, marketplace_value, item_attr, has_attr):
+    mocker_item = mocker.Mock(spec=[item_attr])
+    mocker_marketplace = mocker.Mock(spec=['value'])
+    mocker_marketplace.value = marketplace_value
+    mocker_datetime = mocker.patch('codes.datetime')
+    mocker_datetime.datetime.now.return_value = datetime.date(2021, 9, 3)
+    _set_listed_at(mocker_item, mocker_marketplace)
+    if has_attr:
+        print()
+        assert getattr(mocker_item, f'{mocker_marketplace.value}_listed_at') == mocker_datetime.datetime.now()
+    else:
+        with pytest.raises(AttributeError):
+            assert getattr(mocker_item, f'{marketplace_value}_listed_at') == mocker_datetime.datetime.now()
