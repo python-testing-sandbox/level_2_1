@@ -2,7 +2,7 @@ import pytest
 import datetime
 
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively,
-                   get_params_from_config, _set_listed_at)
+                   get_params_from_config, _set_listed_at, DateTimeProcessor)
 
 
 @pytest.mark.parametrize(
@@ -86,3 +86,14 @@ def test_set_listed_at(mocker, marketplace_value, item_attr, has_attr):
     else:
         with pytest.raises(AttributeError):
             assert getattr(mocker_item, f'{marketplace_value}_listed_at') == mocker_datetime.datetime.now()
+
+
+@pytest.mark.parametrize(
+    'datetime_str, formats,  parser, expected',
+    [
+        ('9 3 2021', ['%d %m %Y'], None, datetime.datetime(2021, 3, 9, 0, 0)),
+    ]
+ )
+def test_get_datetime_from_string(datetime_str, formats, parser, expected):
+    date_time_processor = DateTimeProcessor(formats=formats, parser=parser)
+    assert date_time_processor._get_datetime_from_string(datetime_str) == expected
