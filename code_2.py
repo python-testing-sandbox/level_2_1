@@ -3,8 +3,9 @@ import datetime
 import os
 import sqlite3
 import sys
+import re
 from pathlib import Path
-from typing import Optional, Set, re, Callable, Union, Collection, Mapping, Any
+from typing import Optional, Set, Callable, Union, Collection, Mapping, Any
 
 import deal as deal
 from PIL import UnidentifiedImageError
@@ -154,6 +155,7 @@ class DateTimeProcessor:
         else:
             raise ColumnError(f'Unable to convert to date {value}.')
         if self.user_timezone:
+            print(self.user_timezone)
             value = value.astimezone(self.user_timezone)
         return value
 
