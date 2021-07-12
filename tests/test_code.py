@@ -1,8 +1,10 @@
+import unittest
 import pytest
 import datetime
 from PIL import UnidentifiedImageError
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively,
-                   get_params_from_config, _set_listed_at, DateTimeProcessor, fetch_badges_urls)
+                   get_params_from_config, _set_listed_at, DateTimeProcessor, fetch_badges_urls,
+                   skip_exceptions_to_reraise, )
 
 
 @pytest.mark.parametrize(
@@ -114,3 +116,21 @@ def test_fetch_badges_urls(mocker, readme_content, image_height, error, expected
     mocker_image_height = mocker.patch('codes.get_image_height_in_pixels', return_value=image_height)
     mocker_image_height.side_effect = error
     assert fetch_badges_urls(readme_content) == expected
+
+
+@pytest.mark.parametrize(
+    'sys_modules',
+    [
+        (['unittest']),
+        (['unittest2']),
+        (['nose']),
+        (['_pytest']),
+    ]
+)
+def test_skip_exceptions_to_reraise(mocker, sys_modules):
+    mocker_sys = mocker.patch('codes.sys')
+    mocker_test = mocker.Mock()
+    mocker_test.SkipTest = unittest.SkipTest
+    mocker_test.outcomes.Skipped = unittest.SkipTest
+    mocker_sys.modules = {module: mocker_test for module in sys_modules}
+    assert skip_exceptions_to_reraise() == (unittest.SkipTest,)
