@@ -1,5 +1,6 @@
 import datetime
-
+import sys
+from io import StringIO
 
 import pytest
 from PIL import UnidentifiedImageError
@@ -175,11 +176,22 @@ def test_datetime_processor(time_zone, expectation, expected):
         assert daytime_obj.user_timezone == expected
 
 
-def test_set_listed_at(mocker):
-    item_mock = mocker.MagicMock()
+@pytest.mark.parametrize(
+    'marketplace_value, expected',
+    [
+        ('ebay', 2021),
+    ]
+)
+def test_set_listed_at(mocker, marketplace_value, expected):
+    item_mock_2 = mocker.MagicMock()
     marketplace_mock = mocker.MagicMock()
-    marketplace_mock.value = 'ebay'
-    listed_at_field_name = f'ebay_listed_at'
+    marketplace_mock.value = marketplace_value
+    listed_at_field_name = f'{marketplace_value}_listed_at'
+    setattr(item_mock_2, listed_at_field_name, None)
+
+    code_2._set_listed_at(item_mock_2, marketplace_mock)
+
+    assert getattr(item_mock_2, listed_at_field_name).year == expected
 
 
 def test_load_workbook_from_xls():
@@ -190,8 +202,12 @@ def test_skip_exceptions_to_reraise():
     pass
 
 
+def test_reorder_vocabulary(mocker):
+    out = StringIO()
+    sys.stdout = out
+    mock_open = mocker.mock_open(read_data='#some data ')
+    mocker.patch('builtins.open', mock_open)
+    sys.stdout = sys.__stdout__
+    print('Captured', out.getvalue())
 
-
-
-def test_reorder_vocabulary():
-    pass
+    assert code_2.reorder_vocabulary('some/file.txt') == 200
