@@ -174,4 +174,3 @@ def test_get_content_from_file(mocker, guess_encoding, data, error, expected):
 
 def test_load_workbook_from_xls():
     pass
-
