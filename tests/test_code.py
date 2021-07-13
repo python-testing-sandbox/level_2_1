@@ -200,3 +200,5 @@ def test_get_content_from_file(mocker, guess_encoding, data, error, expected):
     assert get_content_from_file('text.txt', guess_encoding) == expected
 
 
+def test_load_workbook_from_xls():
+    pass
