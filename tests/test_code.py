@@ -5,7 +5,7 @@ from pytz import timezone
 from PIL import UnidentifiedImageError
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively,
                    get_params_from_config, _set_listed_at, DateTimeProcessor, fetch_badges_urls,
-                   skip_exceptions_to_reraise, get_content_from_file, ColumnError, _load_workbook_from_xls)
+                   skip_exceptions_to_reraise, get_content_from_file, ColumnError,)
 from contextlib import nullcontext
 
 
@@ -174,4 +174,4 @@ def test_get_content_from_file(mocker, guess_encoding, data, error, expected):
 
 def test_load_workbook_from_xls():
     pass
-    assert _load_workbook_from_xls()
+
