@@ -4,7 +4,7 @@ import datetime
 from PIL import UnidentifiedImageError
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively,
                    get_params_from_config, _set_listed_at, DateTimeProcessor, fetch_badges_urls,
-                   skip_exceptions_to_reraise, )
+                   skip_exceptions_to_reraise, get_content_from_file,)
 
 
 @pytest.mark.parametrize(
@@ -134,3 +134,20 @@ def test_skip_exceptions_to_reraise(mocker, sys_modules):
     mocker_test.outcomes.Skipped = unittest.SkipTest
     mocker_sys.modules = {module: mocker_test for module in sys_modules}
     assert skip_exceptions_to_reraise() == (unittest.SkipTest,)
+
+
+@pytest.mark.parametrize(
+    'guess_encoding, data, error, expected',
+    [
+        (True, 'something\nelse\n', False, 'something\nelse\n'),
+        (False, 'something\nelse\n', False, 'something\nelse\n'),
+        (False, 'something\nelse\n', True, None),
+    ]
+)
+def test_get_content_from_file(mocker, guess_encoding, data, error, expected):
+    mocker_open_file = mocker.mock_open(read_data=data)
+    mocker_read = mocker.patch('builtins.open', mocker_open_file)
+    mocker.patch('codes.detect', return_value={'encoding': 'utf-8'})
+    if error:
+        mocker_read.side_effect = UnicodeDecodeError('error', b"any", 0, 0, 'error')
+    assert get_content_from_file('text.txt', guess_encoding) == expected
