@@ -4,7 +4,8 @@ import datetime
 from PIL import UnidentifiedImageError
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively,
                    get_params_from_config, _set_listed_at, DateTimeProcessor, fetch_badges_urls,
-                   skip_exceptions_to_reraise, get_content_from_file,)
+                   skip_exceptions_to_reraise, get_content_from_file, ColumnError)
+from contextlib import nullcontext
 
 
 @pytest.mark.parametrize(
@@ -91,23 +92,27 @@ def test_set_listed_at(mocker, marketplace_value, item_attr, has_attr):
 
 
 @pytest.mark.parametrize(
-    'datetime_str, formats,  parser, expected',
+    'formats, side_effect, value_parser, value, expected, expectation',
     [
-        ('9 3 2021', ['%d %m %Y'], None, datetime.datetime(2021, 3, 9, 0, 0)),
+        (None, ValueError, None, 'value', None, pytest.raises(ColumnError)),
+        (['%d %m %Y'], None, None, 'value',  datetime.datetime(2021, 3, 9, 0, 0), pytest.raises(ColumnError)),
+        (None, None, '', '9 3 2021', '', nullcontext()),
     ]
 )
-def test_get_datetime_from_string(datetime_str, formats, parser, expected):
-    date_time_processor = DateTimeProcessor(formats=formats, parser=parser)
-    assert date_time_processor._get_datetime_from_string(datetime_str) == expected
+def test_get_datetime_from_string(mocker, formats, side_effect, value_parser, value, expected, expectation):
+    mocker_parser = mocker.MagicMock(side_effect=side_effect, return_value=value_parser)
+    processor = DateTimeProcessor(formats=formats, parser=mocker_parser)
+    with expectation:
+        assert processor._get_datetime_from_string(value) == expected
 
 
 @pytest.mark.parametrize(
     'readme_content, image_height, error, expected',
     [
-        ('![](httpG![](httpg ?d[+g`)', 100, None, []),
-        ('![](http://)', 50, None, ['http://']),
-        ('![](http://)', None, None, []),
-        ('![](http://)', 100, UnidentifiedImageError(), ['http://']),
+        ('![](http3:![](httpgs esefdg`)', 100, None, []),
+        ('![img](http://)', 50, None, ['http://']),
+        ('![img](http://)', None, None, []),
+        ('![img](http://)', 100, UnidentifiedImageError(), ['http://']),
         ('', None, UnidentifiedImageError(), []),
         ('', 100, UnidentifiedImageError(), []),
     ]
@@ -151,3 +156,13 @@ def test_get_content_from_file(mocker, guess_encoding, data, error, expected):
     if error:
         mocker_read.side_effect = UnicodeDecodeError('error', b"any", 0, 0, 'error')
     assert get_content_from_file('text.txt', guess_encoding) == expected
+
+#
+# @pytest.mark.parametrize(
+#     'time_zone, expectation, has_users_timezone,expected',
+#     [
+#         ('Europe/Moscow', None, timezone('Europe/Moscow')),
+#         ('Puapao', pytest.raises(ValueError), None),
+#         ('Puapao', ColumnError(), None),
+#     ]
+# )
