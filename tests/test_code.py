@@ -183,22 +183,22 @@ def test_skip_exceptions_to_reraise(mocker, sys_modules):
     assert skip_exceptions_to_reraise() == (unittest.SkipTest,)
 
 
-# @pytest.mark.parametrize(
-#     'guess_encoding, data, error, expected',
-#     [
-#         (True, 'something\nelse\n', False, 'something\nelse\n'),
-#         (False, 'something\nelse\n', False, 'something\nelse\n'),
-#         (False, 'something\nelse\n', True, None),
-#     ]
-# )
-# def test_get_content_from_file(mocker, guess_encoding, data, error, expected):
-#     mocker_open_file = mocker.mock_open(read_data=data)
-#     mocker_read = mocker.patch('builtins.open', mocker_open_file)
-#     mocker.patch('codes.detect', return_value={'encoding': 'utf-8'})
-#     if error:
-#         mocker_read.side_effect = UnicodeDecodeError('error', b"any", 0, 0, 'error')
-#     assert get_content_from_file('text.txt', guess_encoding) == expected
-#
-#
-# def test_load_workbook_from_xls():
-#     pass
+@pytest.mark.parametrize(
+    'guess_encoding, data, error, expected',
+    [
+        (True, 'something\nelse\n', False, 'something\nelse\n'),
+        (False, 'something\nelse\n', False, 'something\nelse\n'),
+        (False, 'something\nelse\n', True, None),
+    ]
+)
+def test_get_content_from_file(mocker, guess_encoding, data, error, expected):
+    mocker_open_file = mocker.mock_open(read_data=data)
+    mocker_read = mocker.patch('builtins.open', mocker_open_file)
+    mocker.patch('codes.detect', return_value={'encoding': 'utf-8'})
+    if error:
+        mocker_read.side_effect = UnicodeDecodeError('error', b"any", 0, 0, 'error')
+    assert get_content_from_file('text.txt', guess_encoding) == expected
+
+
+def test_load_workbook_from_xls():
+    pass
