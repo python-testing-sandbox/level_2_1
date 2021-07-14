@@ -226,8 +226,8 @@ def test_load_workbook_from_xls(mocker, value, ctype):
     [
         ('', ''),
         ('\nOne\n2\nIII', '2\nIII\nOne\n'),
-        ('para\n#me\nter\n', 'me\npara\nter\n'),
-        ('#para\nme\nter\n', 'me\npara\nter\n'),
+        ('para\n#me\nter\n', 'para\n\n#me\nter\n'),
+        ('#para\nme\nter\n', '#para\nme\nter\n'),
     ]
 )
 def test_reorder_vocabulary(tmpdir, data, expected):
