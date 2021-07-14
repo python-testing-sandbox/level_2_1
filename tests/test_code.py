@@ -127,7 +127,8 @@ def test_date_time_processor(user_timezone, excepted, expectation):
         ('%d %m %Y', datetime.datetime(2021, 3, 9), None, False, datetime.datetime(2021, 3, 9)),
         ('%d %m %Y', datetime.date(2021, 3, 9), None, False, datetime.datetime(2021, 3, 9, 0, 0)),
         ('%d %m %Y', '25 3 2021', datetime.datetime(2021, 3, 25), False, datetime.datetime(2021, 3, 25)),
-        ('%d %m %Y', datetime.datetime(2021, 3, 9), None, 'Europe/Moscow', datetime.datetime(2021, 3, 9).astimezone(timezone('Europe/Moscow'))),
+        ('%d %m %Y', datetime.datetime(2021, 3, 9), None,
+         'Europe/Moscow', datetime.datetime(2021, 3, 9).astimezone(timezone('Europe/Moscow'))),
     ]
 )
 def test_process_value(mocker, format, value, expected_datetime, has_user_timezone, expected):
