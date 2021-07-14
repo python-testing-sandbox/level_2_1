@@ -6,7 +6,7 @@ from PIL import UnidentifiedImageError
 from codes import (load_obscene_words, fetch_detailed_pull_requests, get_all_filepathes_recursively,
                    get_params_from_config, _set_listed_at, DateTimeProcessor, fetch_badges_urls,
                    skip_exceptions_to_reraise, get_content_from_file, ColumnError,
-                   _load_workbook_from_xls,)
+                   _load_workbook_from_xls, reorder_vocabulary)
 from contextlib import nullcontext
 
 
@@ -218,3 +218,19 @@ def test_load_workbook_from_xls(mocker, value, ctype):
     xls_workbook_mock().datemode = 1
     mocker.patch('datetime.datetime', return_value=1)
     assert _load_workbook_from_xls('super_path', 'super_content') == workbook_mock()
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    [
+        ('', ''),
+        ('\nOne\n2\nIII', '2\nIII\nOne\n'),
+        ('para\nme\nter\n', 'me\npara\nter\n'),
+    ]
+)
+def test_reorder_vocabulary(tmpdir, data, expected):
+    dir = tmpdir.mkdir("sub")
+    file = dir.join('test.txt')
+    file.write(data)
+    reorder_vocabulary(file.strpath)
+    assert file.read() == expected
