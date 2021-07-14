@@ -140,17 +140,15 @@ def test_process_value(mocker, format, value, expected_datetime, has_user_timezo
 
 
 @pytest.mark.parametrize(
-    'value, expected, error',
+    'value, exception',
     [
-        ('abx', None, ColumnError),
+        (412, ColumnError),
     ]
 )
-def test_process_value_error(mocker, value, expected, error):
-    processor = DateTimeProcessor()
-    mocker.patch('codes.DateTimeProcessor._get_datetime_from_string', side_effect=error)
-    with pytest.raises(ColumnError):
-        processor.process_value(value)
-
+def test_process_value_with_raises(value, exception):
+    with pytest.raises(exception):
+        processor = DateTimeProcessor()
+        assert processor.process_value(value)
 
 @pytest.mark.parametrize(
     'readme_content, image_height, error, expected',
