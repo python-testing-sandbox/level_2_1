@@ -206,6 +206,7 @@ def test_get_content_from_file(mocker, guess_encoding, data, error, expected):
     [
         (1, 2),
         (1, 1),
+        (1, 3),
     ]
 )
 def test_load_workbook_from_xls(mocker, value, ctype):
