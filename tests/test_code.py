@@ -150,6 +150,7 @@ def test_process_value_with_raises(value, exception):
         processor = DateTimeProcessor()
         assert processor.process_value(value)
 
+
 @pytest.mark.parametrize(
     'readme_content, image_height, error, expected',
     [
