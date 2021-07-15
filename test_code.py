@@ -10,7 +10,7 @@ from code_2 import (load_obscene_words, get_all_filepathes_recursively,
                     get_content_from_file, get_params_from_config,
                     fetch_badges_urls, DateTimeProcessor
                     )
-from conftest import does_not_raise, redirect_stdout
+from conftest import does_not_raise
 
 
 @pytest.mark.parametrize(
@@ -22,7 +22,7 @@ from conftest import does_not_raise, redirect_stdout
         ([[], []], set())
     ]
 )
-def test_load_obscene_words(mocker, db_command, expected):
+def test_load_from_obscene_words(mocker, db_command, expected):
     db_mock = mocker.patch('code_2.sqlite3')
     connection = db_mock.connect()
     cursor = connection.cursor()
@@ -107,28 +107,28 @@ def test_fetch_badges_urls(mocker, readme_content, pic_height, error, expected):
 
 
 @pytest.mark.parametrize(
-    'format, value, return_value, expected',
+    'date_format, value, return_value, expected',
     [
         (['%Y-%m-%d %H:%M:%S'], '2021-07-08 12:34:25', None, datetime.datetime(2021, 7, 8, 12, 34, 25)),
         (None, '2021-07-08 13:34:25', '2021-07-08 12:34:25', '2021-07-08 12:34:25'),
     ]
 )
-def test_get_datetime_from_string_successfully(mocker, format, value, return_value, expected):
+def test_get_datetime_from_string_successfully(mocker, date_format, value, return_value, expected):
     mock_parser = mocker.MagicMock(return_value=return_value)
-    daytime_obj = DateTimeProcessor(formats=format, parser=mock_parser)
+    daytime_obj = DateTimeProcessor(formats=date_format, parser=mock_parser)
     assert daytime_obj._get_datetime_from_string(value) == expected
 
 
 @pytest.mark.parametrize(
-    'format, wrong_value, return_value, side_effect, expected',
+    'date_format, wrong_value, return_value, side_effect, expected',
     [
         (['%Y-%m-%d %H:%M:%S'], '2021/07/08 13:34:25', None, None, None),
         (None, '2021/07/08 13:34:25', None, ValueError, None),
     ]
 )
-def test_get_datetime_from_string_error(mocker, side_effect, format, wrong_value, return_value, expected):
+def test_get_datetime_from_string_error(mocker, side_effect, date_format, wrong_value, return_value, expected):
     mock_parser = mocker.MagicMock(side_effect=side_effect, return_value=return_value)
-    daytime_obj = DateTimeProcessor(formats=format, parser=mock_parser)
+    daytime_obj = DateTimeProcessor(formats=date_format, parser=mock_parser)
     with pytest.raises(code_2.ColumnError):
         assert daytime_obj._get_datetime_from_string(wrong_value) == expected
 
@@ -262,4 +262,3 @@ def test_skip_exceptions_to_reraise(mocker, sys_modules):
     mocker_test.outcomes.Skipped = unittest.SkipTest
     mocker_sys.modules = {module: mocker_test for module in sys_modules}
     assert code_2.skip_exceptions_to_reraise() == (unittest.SkipTest,)
-
