@@ -1,6 +1,5 @@
 import datetime
-import sys
-from io import StringIO
+import unittest
 
 import pytest
 from PIL import UnidentifiedImageError
@@ -11,7 +10,7 @@ from code_2 import (load_obscene_words, get_all_filepathes_recursively,
                     get_content_from_file, get_params_from_config,
                     fetch_badges_urls, DateTimeProcessor
                     )
-from conftest import does_not_raise
+from conftest import does_not_raise, redirect_stdout
 
 
 @pytest.mark.parametrize(
@@ -194,20 +193,73 @@ def test_set_listed_at(mocker, marketplace_value, expected):
     assert getattr(item_mock_2, listed_at_field_name).year == expected
 
 
-def test_load_workbook_from_xls():
-    pass
+@pytest.mark.parametrize(
+    'input_data, handled_data',
+    [
+        ('text \n \n  #\nTitle text', ['text\n', '\n', '#\n', 'Title text\n']),
+        ('text', ['text\n']),
+        ('', []),
+        ('text \n \n  #\nTitle \n #text', ['text\n', '\n', '#\n', 'Title\n', '\n', '#text\n']),
+    ],
+)
+def test_reorder_vocabulary(mocker, input_data, handled_data):
+    mock_open = mocker.mock_open(read_data=input_data)
+    mock_file = mocker.patch('builtins.open', mock_open)
+    mock_file().writelines.return_value = None
+    code_2.reorder_vocabulary('path/file.txt')
+
+    mock_file().writelines.assert_called_with(handled_data)
+    assert mock_file().readlines.call_count == 1
 
 
-def test_skip_exceptions_to_reraise():
-    pass
+@pytest.mark.parametrize(
+    'value, ctype',
+    [
+        (10, 3),
+        (9, 2),
+        (0, 3),
+    ],
+)
+def test_load_workbook_from_xls(mocker, value, ctype):
+    xls_workbook_mock = mocker.patch('xlrd.open_workbook', autospec=True)
+    workbook_mock = mocker.patch('code_2.Workbook', return_value=mocker.MagicMock())
+    xls_sheet_mock = xls_workbook_mock().sheet_by_index()
+    xls_sheet_mock.cell().value = value
+    xls_sheet_mock.cell().ctype = ctype
+    xls_workbook_mock().datemode = 1
+    mocker.patch('datetime.datetime', return_value=1)
+
+    assert code_2._load_workbook_from_xls('super_path', 'super_content') == workbook_mock()
 
 
-def test_reorder_vocabulary(mocker):
-    out = StringIO()
-    sys.stdout = out
-    mock_open = mocker.mock_open(read_data='#some data ')
-    mocker.patch('builtins.open', mock_open)
-    sys.stdout = sys.__stdout__
-    print('Captured', out.getvalue())
+@pytest.mark.parametrize(
+    'open_pull_requests, fetch_value, expected',
+    [
+        ([{'number': 10}], {'number': 10}, {10: {'number': 10}}),
+        ([{'number': 9}], None, {}),
+    ],
+)
+def test_fetch_detailed_pull_requests(mocker, open_pull_requests, fetch_value, expected):
+    api_mock = mocker.MagicMock()
+    api_mock.fetch_pull_request.return_value = fetch_value
 
-    assert code_2.reorder_vocabulary('some/file.txt') == 200
+    assert code_2.fetch_detailed_pull_requests(api_mock, open_pull_requests) == expected
+
+
+@pytest.mark.parametrize(
+    'sys_modules',
+    [
+        (['unittest']),
+        (['unittest2']),
+        (['nose']),
+        (['_pytest']),
+    ]
+)
+def test_skip_exceptions_to_reraise(mocker, sys_modules):
+    mocker_sys = mocker.patch('code_2.sys')
+    mocker_test = mocker.Mock()
+    mocker_test.SkipTest = unittest.SkipTest
+    mocker_test.outcomes.Skipped = unittest.SkipTest
+    mocker_sys.modules = {module: mocker_test for module in sys_modules}
+    assert code_2.skip_exceptions_to_reraise() == (unittest.SkipTest,)
+

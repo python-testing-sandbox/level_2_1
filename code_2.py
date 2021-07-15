@@ -178,7 +178,6 @@ def _load_workbook_from_xls(file_path, file_contents) -> Workbook:
     xls_sheet = xls_workbook.sheet_by_index(0)
     nrows = xls_sheet.nrows
     ncols = xls_sheet.ncols
-
     wb = Workbook()
     ws = wb[wb.sheetnames[0]]
 
@@ -188,6 +187,7 @@ def _load_workbook_from_xls(file_path, file_contents) -> Workbook:
             value = cell.value
             if value and cell.ctype == 3:
                 value = datetime.datetime(*xlrd.xldate_as_tuple(value, xls_workbook.datemode))
+                print(value)
             ws.cell(row=row + 1, column=col + 1).value = value
 
     return wb
