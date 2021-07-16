@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/DmitryTokyo/level_2_1.svg?branch=master)](https://travis-ci.com/DmitryTokyo/level_2_1)
+[![codecov](https://codecov.io/gh/DmitryTokyo/level_2_1/branch/master/graph/badge.svg?token=JVY6FRT1EG)](https://codecov.io/gh/DmitryTokyo/level_2_1)
+
 # Testing sandbox level 2.1
 
 Welcome to the testing sandbox: practice-driven testing instrument.
