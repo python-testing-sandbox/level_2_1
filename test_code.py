@@ -259,6 +259,8 @@ def test_skip_exceptions_to_reraise(mocker, sys_modules):
     mocker_sys = mocker.patch('code_2.sys')
     mocker_test = mocker.Mock()
     mocker_test.SkipTest = unittest.SkipTest
-    mocker_test.outcomes.Skipped = unittest.SkipTest
+    if sys_modules == ['_pytest']:
+        mocker_test.outcomes.Skipped = unittest.SkipTest
+
     mocker_sys.modules = {module: mocker_test for module in sys_modules}
     assert code_2.skip_exceptions_to_reraise() == (unittest.SkipTest,)
