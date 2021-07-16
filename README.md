@@ -1,3 +1,6 @@
+[![Build Status](https://www.travis-ci.com/fattybobcat/level_2_1.svg?branch=master)](https://www.travis-ci.com/fattybobcat/level_2_1)
+[![codecov](https://codecov.io/gh/fattybobcat/level_2_1/branch/master/graph/badge.svg?token=NU2KXZ0EIY)](https://codecov.io/gh/fattybobcat/level_2_1)
+
 # Testing sandbox level 2.1
 
 Welcome to the testing sandbox: practice-driven testing instrument.
