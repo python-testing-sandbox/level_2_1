@@ -176,21 +176,26 @@ def test_datetime_processor(time_zone, expectation, expected):
 
 
 @pytest.mark.parametrize(
-    'marketplace_value, expected',
+    'marketplace_slug, listed_at_field_name',
     [
-        ('ebay', 2021),
-    ]
+        ('ebay', 'ebay_listed_at'),
+        ('etsy', None),
+    ],
 )
-def test_set_listed_at(mocker, marketplace_value, expected):
-    item_mock_2 = mocker.MagicMock()
+def test_set_listed_at(mocker, marketplace_slug, listed_at_field_name):
+    item_mock_2 = mocker.MagicMock(spec=[listed_at_field_name])
     marketplace_mock = mocker.MagicMock()
-    marketplace_mock.value = marketplace_value
-    listed_at_field_name = f'{marketplace_value}_listed_at'
-    setattr(item_mock_2, listed_at_field_name, None)
+    marketplace_mock.value = marketplace_slug
+
+    mock_datetime = mocker.patch('code_2.datetime')
+    mock_datetime.datetime.now.return_value = datetime.datetime(2021, 7, 16)
 
     code_2._set_listed_at(item_mock_2, marketplace_mock)
-
-    assert getattr(item_mock_2, listed_at_field_name).year == expected
+    if listed_at_field_name:
+        assert getattr(item_mock_2, listed_at_field_name) == mock_datetime.datetime.now()
+    else:
+        with pytest.raises(TypeError):
+            assert getattr(item_mock_2, listed_at_field_name)
 
 
 @pytest.mark.parametrize(
@@ -236,6 +241,7 @@ def test_load_workbook_from_xls(mocker, value, ctype):
     'open_pull_requests, fetch_value, expected',
     [
         ([{'number': 10}], {'number': 10}, {10: {'number': 10}}),
+        ([{'number': 10}, {'number': 9}], {'number': 10}, {10: {'number': 10}}),
         ([{'number': 9}], None, {}),
     ],
 )
