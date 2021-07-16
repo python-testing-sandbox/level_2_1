@@ -43,6 +43,7 @@ def test_fetch_detailed_pull_requests(mocker, open_pull_requests, pull_request, 
     [
         (['test_code.py, confest.py'], True, 'py', []),
         (['test_code.py, confest.py'], False, 'py', ['test_code.py, confest.py']),
+        ([], False, 'py', []),
     ]
 )
 def test_get_all_filepathes_recursively(path_file, is_dir, extension, expected, mocker):
@@ -64,7 +65,6 @@ def test_get_all_filepathes_recursively(path_file, is_dir, extension, expected, 
 )
 def test_get_params_from_config(mocker, config_section, params, expected):
     mocker_config_parser = mocker.patch('codes.configparser', autospec=True)
-    mocker_config_parser.ConfigParser().read.return_value = None
     mocker_config_parser.ConfigParser().has_section.return_value = config_section
     mocker_config_parser.ConfigParser().__getitem__.return_value = params
     assert get_params_from_config('config_path') == expected
@@ -229,6 +229,7 @@ def test_load_workbook_from_xls(mocker, value, ctype):
         ('\nOne\n2\nIII', '2\nIII\nOne\n'),
         ('para\n#me\nter\n', 'para\n\n#me\nter\n'),
         ('#para\nme\nter\n', '#para\nme\nter\n'),
+        ('#para one\nme two\nter 3\n', '#para one\nme two\nter 3\n'),
     ]
 )
 def test_reorder_vocabulary(tmpdir, data, expected):
