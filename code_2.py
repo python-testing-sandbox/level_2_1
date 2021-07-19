@@ -155,7 +155,6 @@ class DateTimeProcessor:
         else:
             raise ColumnError(f'Unable to convert to date {value}.')
         if self.user_timezone:
-            print(self.user_timezone)
             value = value.astimezone(self.user_timezone)
         return value
 
