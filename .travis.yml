@@ -4,7 +4,7 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - flake8 .
-  - pytest --cov=code_2 --cov-branch test_code.py
+  - make style
+  - make test
 after_success:
   - bash <(curl -s https://codecov.io/bash)
